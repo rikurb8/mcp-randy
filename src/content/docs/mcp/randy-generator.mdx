@@ -1,0 +1,739 @@
+---
+title: Randy's MCP Server Generator
+description: Let Randy create custom MCP servers for you with interactive templates and code generation
+---
+
+import { RandyAssistant } from '../../../components/randy/RandyAssistant.tsx';
+import { PocketPickAnalyzer } from '../../../components/tools/PocketPickAnalyzer.tsx';
+
+# Randy's MCP Server Generator
+
+The ultimate tool for MCP server development! Randy combines his enthusiasm with deep MCP knowledge to generate complete, production-ready servers tailored to your specific needs.
+
+## 🚀 Interactive Server Generation
+
+Randy is ready to build your custom MCP server! He'll ask the right questions and generate exactly what you need:
+
+<RandyAssistant 
+  mode="request-response" 
+  showMCPControls={false}
+  client:load 
+/>
+
+Try these generation requests:
+- *"Create a Go MCP server for file operations with encryption"*
+- *"Build a JavaScript MCP server for database management"*
+- *"Generate a Python MCP server for API aggregation"*
+- *"Make me a TypeScript server for content management"*
+
+## 🎯 What Randy Can Generate
+
+Randy's server generation capabilities include:
+
+### 🏗️ Complete Server Projects
+- **Full Project Structure**: Organized directories and files
+- **Configuration Files**: Docker, package.json, go.mod, etc.
+- **Documentation**: README, API docs, examples
+- **Tests**: Unit tests, integration tests, validation
+- **Deployment**: Docker, CI/CD, cloud deployment configs
+
+### 🔧 Language-Specific Templates
+
+**Go Servers:**
+- Type-safe implementations using mark3labs/mcp-go patterns
+- Proper error handling and validation
+- Concurrent tool execution
+- Resource management
+- Database integration patterns
+
+**JavaScript/TypeScript Servers:**
+- Modern async/await patterns
+- OpenAI Agents SDK integration
+- Express.js HTTP transport
+- WebSocket support
+- Comprehensive type definitions
+
+**Python Servers:**
+- Clean OOP architecture
+- AsyncIO for performance
+- Pydantic for validation
+- FastAPI integration
+- SQLAlchemy ORM patterns
+
+### 🛠️ Tool Categories
+
+Randy can generate servers for any domain:
+
+**File Operations:**
+- Read, write, search, organize files
+- Encryption/decryption capabilities
+- Backup and synchronization
+- Format conversion tools
+
+**Database Management:**
+- CRUD operations for any database
+- Query builders and helpers
+- Migration management
+- Performance optimization tools
+
+**API Integration:**
+- REST API wrappers
+- GraphQL client tools
+- Authentication handling
+- Rate limiting and caching
+
+**Content Management:**
+- Document processing
+- Media file handling
+- Template rendering
+- Content transformation
+
+**Development Tools:**
+- Code analysis and linting
+- Test automation
+- Build system integration
+- Deployment helpers
+
+## 📊 Pocket-Pick Analysis Integration
+
+Before creating your server, Randy can analyze existing data sources like pocket-pick to understand your requirements better:
+
+<PocketPickAnalyzer client:load />
+
+This analysis helps Randy understand:
+- **Data Patterns**: How your information is structured
+- **Usage Patterns**: What operations you perform most
+- **Integration Needs**: What external systems to connect
+- **Performance Requirements**: Scale and optimization needs
+
+## 🎨 Generation Process
+
+### Step 1: Requirements Gathering
+
+Randy asks intelligent questions to understand your needs:
+
+```
+Randy: "Oh my God, let's build something awesome! Tell me:
+1. What domain is this server for? (files, database, API, etc.)
+2. What programming language do you prefer?
+3. What specific tools do you need?
+4. Any external systems to integrate with?
+5. Performance or security requirements?"
+```
+
+### Step 2: Architecture Design
+
+Randy designs the optimal architecture:
+
+```typescript
+// Randy's architectural analysis
+interface ServerArchitecture {
+  language: 'go' | 'javascript' | 'typescript' | 'python';
+  transport: 'stdio' | 'http' | 'websocket' | 'all';
+  tools: ToolDefinition[];
+  resources: ResourceDefinition[];
+  integrations: Integration[];
+  middleware: Middleware[];
+  testing: TestStrategy;
+  deployment: DeploymentConfig;
+}
+```
+
+### Step 3: Code Generation
+
+Randy generates production-ready code with:
+
+- **Best Practices**: Following language-specific conventions
+- **Error Handling**: Comprehensive error management
+- **Documentation**: Inline comments and external docs
+- **Testing**: Unit and integration test suites
+- **Security**: Input validation and sanitization
+- **Performance**: Optimized patterns and caching
+
+### Step 4: Validation & Testing
+
+Randy includes validation tools:
+
+```python
+# Generated validation script
+async def validate_mcp_server(server_url: str):
+    """Randy's comprehensive MCP server validation"""
+    
+    validator = MCPValidator()
+    
+    # Protocol compliance
+    await validator.check_initialization(server_url)
+    await validator.validate_tool_definitions()
+    await validator.test_error_handling()
+    
+    # Performance testing
+    await validator.load_test_tools()
+    await validator.measure_response_times()
+    
+    # Security validation
+    await validator.test_input_sanitization()
+    await validator.check_authentication()
+    
+    return validator.generate_report()
+```
+
+## 💻 Generated Server Examples
+
+### Go File Operations Server
+
+When you ask Randy for a Go file server, he generates:
+
+```go
+// Generated by Randy - File Operations MCP Server
+package main
+
+import (
+    "context"
+    "crypto/aes"
+    "crypto/cipher"
+    "crypto/rand"
+    "encoding/base64"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    
+    "github.com/mark3labs/mcp-go/mcp"
+    "github.com/mark3labs/mcp-go/server"
+)
+
+type FileServer struct {
+    server.BaseServer
+    encryptionKey []byte
+    basePath      string
+}
+
+func NewFileServer(basePath string, encryptionKey []byte) *FileServer {
+    return &FileServer{
+        basePath:      basePath,
+        encryptionKey: encryptionKey,
+    }
+}
+
+func (fs *FileServer) RegisterTools() {
+    // Randy generates all the tools you need!
+    fs.RegisterTool("read_file", fs.ReadFile)
+    fs.RegisterTool("write_file", fs.WriteFile)
+    fs.RegisterTool("encrypt_file", fs.EncryptFile)
+    fs.RegisterTool("decrypt_file", fs.DecryptFile)
+    fs.RegisterTool("search_files", fs.SearchFiles)
+}
+
+// Randy generates comprehensive error handling
+func (fs *FileServer) ReadFile(ctx context.Context, params map[string]interface{}) (*mcp.ToolResult, error) {
+    path, ok := params["path"].(string)
+    if !ok {
+        return nil, fmt.Errorf("path parameter is required")
+    }
+    
+    // Security: Validate path is within base directory
+    if !fs.isPathSafe(path) {
+        return nil, fmt.Errorf("path outside allowed directory")
+    }
+    
+    content, err := os.ReadFile(filepath.Join(fs.basePath, path))
+    if err != nil {
+        return nil, fmt.Errorf("failed to read file: %w", err)
+    }
+    
+    return &mcp.ToolResult{
+        Content: map[string]interface{}{
+            "path":    path,
+            "content": string(content),
+            "size":    len(content),
+        },
+    }, nil
+}
+
+// Randy includes security validations
+func (fs *FileServer) isPathSafe(path string) bool {
+    absPath, err := filepath.Abs(filepath.Join(fs.basePath, path))
+    if err != nil {
+        return false
+    }
+    
+    absBase, err := filepath.Abs(fs.basePath)
+    if err != nil {
+        return false
+    }
+    
+    return strings.HasPrefix(absPath, absBase)
+}
+```
+
+### TypeScript API Integration Server
+
+For API integration requests, Randy creates:
+
+```typescript
+// Generated by Randy - API Integration MCP Server
+import { StdioServerTransport } from '@openai/mcp-server';
+import { z } from 'zod';
+import axios, { AxiosInstance } from 'axios';
+
+class APIIntegrationServer {
+    private transport: StdioServerTransport;
+    private clients: Map<string, AxiosInstance> = new Map();
+    private rateLimiter: RateLimiter;
+
+    constructor() {
+        this.transport = new StdioServerTransport({
+            name: 'randy-api-server',
+            version: '1.0.0'
+        });
+        
+        this.rateLimiter = new RateLimiter();
+        this.setupTools();
+    }
+
+    private setupTools() {
+        // Randy generates all the API tools you need
+        this.transport.tool('configure_api', {
+            description: 'Configure a new API client',
+            parameters: z.object({
+                name: z.string(),
+                baseURL: z.string().url(),
+                headers: z.record(z.string()).optional(),
+                timeout: z.number().optional()
+            }),
+            handler: this.configureAPI.bind(this)
+        });
+
+        this.transport.tool('api_request', {
+            description: 'Make API requests with automatic retries',
+            parameters: z.object({
+                apiName: z.string(),
+                endpoint: z.string(),
+                method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
+                data: z.any().optional(),
+                params: z.record(z.string()).optional()
+            }),
+            handler: this.makeAPIRequest.bind(this)
+        });
+    }
+
+    // Randy includes comprehensive error handling and retry logic
+    private async makeAPIRequest(params: any) {
+        const { apiName, endpoint, method, data, params: queryParams } = params;
+        
+        const client = this.clients.get(apiName);
+        if (!client) {
+            throw new Error(`API client ${apiName} not configured`);
+        }
+
+        // Randy adds rate limiting
+        await this.rateLimiter.waitForToken(apiName);
+
+        try {
+            const response = await client.request({
+                url: endpoint,
+                method,
+                data,
+                params: queryParams
+            });
+
+            return {
+                success: true,
+                data: {
+                    status: response.status,
+                    headers: response.headers,
+                    data: response.data
+                }
+            };
+        } catch (error) {
+            // Randy includes intelligent retry logic
+            if (this.shouldRetry(error)) {
+                return this.retryRequest(params);
+            }
+            throw error;
+        }
+    }
+}
+```
+
+## 🧪 Testing & Validation
+
+Randy generates comprehensive test suites:
+
+### Unit Tests
+
+```typescript
+// Generated test suite by Randy
+describe('Randy Generated MCP Server', () => {
+    let server: APIIntegrationServer;
+
+    beforeEach(() => {
+        server = new APIIntegrationServer();
+    });
+
+    describe('API Configuration', () => {
+        it('should configure API clients correctly', async () => {
+            const result = await server.configureAPI({
+                name: 'test-api',
+                baseURL: 'https://api.example.com',
+                headers: { 'Authorization': 'Bearer token' }
+            });
+
+            expect(result.success).toBe(true);
+        });
+    });
+
+    describe('Rate Limiting', () => {
+        it('should respect rate limits', async () => {
+            // Randy tests all edge cases
+            const startTime = Date.now();
+            
+            // Make multiple requests
+            await Promise.all([
+                server.makeAPIRequest({ /* ... */ }),
+                server.makeAPIRequest({ /* ... */ }),
+                server.makeAPIRequest({ /* ... */ })
+            ]);
+            
+            const duration = Date.now() - startTime;
+            expect(duration).toBeGreaterThan(100); // Rate limit delay
+        });
+    });
+});
+```
+
+### Integration Tests
+
+```python
+# Randy's integration test generator
+import asyncio
+import pytest
+from mcp_client import MCPClient
+
+class TestRandyGeneratedServer:
+    """Comprehensive integration tests generated by Randy"""
+    
+    @pytest.fixture
+    async def mcp_client(self):
+        client = MCPClient('stdio', './randy-server')
+        await client.initialize()
+        return client
+    
+    async def test_server_initialization(self, mcp_client):
+        """Randy tests proper MCP initialization"""
+        info = await mcp_client.get_server_info()
+        assert info['name'] == 'randy-generated-server'
+        assert 'version' in info
+    
+    async def test_all_tools_functional(self, mcp_client):
+        """Randy validates all generated tools"""
+        tools = await mcp_client.list_tools()
+        
+        for tool in tools:
+            # Test each tool with valid parameters
+            result = await mcp_client.call_tool(
+                tool['name'], 
+                self.get_test_params(tool)
+            )
+            assert result['success'] == True
+```
+
+## 🚀 Deployment Integration
+
+Randy generates deployment configurations:
+
+### Docker Configuration
+
+```dockerfile
+# Generated by Randy - Optimized for your server
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -ldflags="-w -s" -o server .
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+
+COPY --from=builder /app/server .
+
+# Randy includes health checks
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD ./server --health-check
+
+CMD ["./server"]
+```
+
+### Kubernetes Deployment
+
+```yaml
+# Randy's Kubernetes configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: randy-mcp-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: randy-mcp-server
+  template:
+    metadata:
+      labels:
+        app: randy-mcp-server
+    spec:
+      containers:
+      - name: server
+        image: randy-mcp-server:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+```
+
+## 🎯 Advanced Generation Features
+
+### Custom Tool Generators
+
+Randy can create domain-specific tools:
+
+```
+Ask Randy: "Create a tool for processing markdown files with 
+front-matter extraction, table of contents generation, and 
+HTML conversion with syntax highlighting"
+```
+
+Randy generates sophisticated tools with:
+- Parameter validation schemas
+- Comprehensive error handling
+- Performance optimizations
+- Security considerations
+- Full documentation
+
+### Plugin Architecture
+
+Randy generates extensible servers:
+
+```typescript
+// Randy's plugin architecture
+interface MCPPlugin {
+    name: string;
+    version: string;
+    tools: ToolDefinition[];
+    middleware?: Middleware[];
+    initialize(server: MCPServer): Promise<void>;
+    cleanup(): Promise<void>;
+}
+
+class PluginManager {
+    private plugins: Map<string, MCPPlugin> = new Map();
+    
+    async loadPlugin(plugin: MCPPlugin) {
+        // Randy handles plugin lifecycle
+        await plugin.initialize(this.server);
+        this.plugins.set(plugin.name, plugin);
+    }
+}
+```
+
+### Configuration Management
+
+Randy includes flexible configuration:
+
+```yaml
+# Randy's configuration system
+server:
+  name: "my-custom-server"
+  version: "1.0.0"
+  transport: "http"
+  port: 3000
+
+tools:
+  - name: "file_operations"
+    enabled: true
+    config:
+      base_path: "/data"
+      encryption: true
+  
+  - name: "api_integration"
+    enabled: true
+    config:
+      rate_limit: 100
+      timeout: 30s
+
+logging:
+  level: "info"
+  format: "json"
+  
+monitoring:
+  metrics: true
+  tracing: true
+```
+
+## 🎮 Interactive Generation Examples
+
+### Example 1: E-commerce Tools Server
+
+```
+You: "Create an MCP server for e-commerce operations including 
+inventory management, order processing, and customer data"
+
+Randy: "Oh my God, e-commerce is so exciting! Let me build you 
+an awesome server with:
+
+🛍️ Inventory Tools:
+- Product CRUD operations
+- Stock level monitoring  
+- Low stock alerts
+- Bulk inventory updates
+
+📦 Order Processing:
+- Order creation and tracking
+- Payment processing integration
+- Shipping calculations
+- Order status updates
+
+👥 Customer Management:
+- Customer profiles
+- Purchase history
+- Loyalty points
+- Marketing segments
+
+I'll use TypeScript with express for HTTP transport, include 
+comprehensive validation, and add monitoring dashboards. 
+This is gonna be so freaking cool!"
+```
+
+### Example 2: DevOps Automation Server
+
+```
+You: "Build me a Go MCP server for DevOps automation with 
+Docker, Kubernetes, and CI/CD integration"
+
+Randy: "Sweet! DevOps automation is my jam! Here's what 
+I'm cooking up:
+
+🐳 Docker Tools:
+- Container management
+- Image operations  
+- Registry interactions
+- Health monitoring
+
+☸️ Kubernetes Tools:
+- Deployment management
+- Service operations
+- Pod monitoring
+- Resource scaling
+
+🔄 CI/CD Integration:
+- Pipeline triggers
+- Build status checks
+- Deployment automation
+- Rollback capabilities
+
+I'll use Go for performance, include proper error handling,
+add metrics collection, and throw in some security scanning.
+This server will be absolutely amazing!"
+```
+
+## 📚 Generated Documentation
+
+Randy creates comprehensive documentation:
+
+### API Documentation
+
+```markdown
+# Randy Generated MCP Server API
+
+## Tools
+
+### file_read
+Read file contents with optional encoding specification.
+
+**Parameters:**
+- `path` (string, required): File path relative to base directory
+- `encoding` (string, optional): File encoding (default: utf-8)
+
+**Returns:**
+- `content`: File contents as string
+- `size`: File size in bytes
+- `modified`: Last modification timestamp
+
+**Example:**
+```json
+{
+  "name": "file_read",
+  "arguments": {
+    "path": "documents/readme.txt",
+    "encoding": "utf-8"
+  }
+}
+```
+
+### Error Handling
+All tools return standardized error responses:
+- Invalid parameters: HTTP 400
+- File not found: HTTP 404  
+- Permission denied: HTTP 403
+- Server errors: HTTP 500
+```
+
+### Setup Instructions
+
+Randy includes detailed setup guides:
+
+```markdown
+# Setup Instructions
+
+## Prerequisites
+- Go 1.21 or later
+- Docker (optional)
+- Git
+
+## Installation
+1. Clone the repository
+2. Install dependencies: `go mod tidy`
+3. Configure environment: `cp .env.example .env`
+4. Run the server: `go run main.go`
+
+## Configuration
+Edit `.env` file with your settings:
+- `BASE_PATH`: Base directory for file operations
+- `ENCRYPTION_KEY`: 32-byte encryption key
+- `PORT`: Server port (default: 3000)
+
+## Testing
+Run the test suite: `go test ./...`
+```
+
+## 🎯 Next Steps
+
+After Randy generates your server:
+
+1. **Customize**: Modify the generated code for your specific needs
+2. **Test**: Run the comprehensive test suite Randy created
+3. **Deploy**: Use Randy's deployment configurations
+4. **Monitor**: Set up the included monitoring and logging
+5. **Extend**: Add new tools using Randy's patterns
+
+---
+
+**Ready to generate?** Use the interactive Randy above to create your custom MCP server! Randy is excited to build something amazing with you!
