@@ -1,36 +1,194 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Welcome to Randy AI Docs
+description: Interactive MCP documentation with Randy, your enthusiastic JARVIS-like assistant
 template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Learn Model Context Protocol with Randy, your JARVIS-like AI companion who makes MCP development exciting and interactive!
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Meet Randy
+      link: /guides/meet-randy/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+      variant: primary
+    - text: Randy Playground
+      link: /examples/randy-playground/
       icon: external
-      variant: minimal
 ---
 
+import { RandyAssistant } from '../../components/randy/RandyAssistant.tsx';
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## 🤖 Meet Randy - Your MCP Assistant
+
+Randy combines the technical sophistication of JARVIS with the infectious enthusiasm of South Park's Randy Marsh. He's here to make learning MCP (Model Context Protocol) both educational and entertaining!
+
+<RandyAssistant mode="chat" showMCPControls={false} client:load />
+
+## 🚀 What Makes This Documentation Special?
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+  <Card title="🎭 Interactive Learning" icon="approve-check">
+    Randy responds to your questions with personality, making complex MCP concepts accessible and memorable.
+  </Card>
+  
+  <Card title="🔌 Live Server Connections" icon="external">
+    Connect to real MCP servers like pocket-pick and see Randy interact with live data in real-time.
+  </Card>
+  
+  <Card title="💻 Runnable Code Examples" icon="puzzle">
+    All code examples are interactive. Randy can generate, modify, and explain code as you learn.
+  </Card>
+  
+  <Card title="🛠️ Server Generation" icon="rocket">
+    Randy can create complete MCP servers in Go, JavaScript, or Python based on your requirements.
+  </Card>
 </CardGrid>
+
+## 🎯 Quick Start Paths
+
+Choose your learning adventure:
+
+### 🆕 New to MCP?
+1. **[Meet Randy](/guides/meet-randy/)** - Get acquainted with your AI guide
+2. **[MCP Overview](/guides/mcp-overview/)** - Understand the protocol basics  
+3. **[Quick Start](/guides/quick-start/)** - Build your first MCP interaction
+
+### 👨‍💻 Ready to Build?
+1. **[Randy Playground](/examples/randy-playground/)** - Full interactive environment
+2. **[Go Server Development](/mcp/go-server/)** - Type-safe Go implementations
+3. **[JavaScript Server Development](/mcp/js-server/)** - Modern JS/TS patterns
+
+### 🔍 Want Live Examples?
+1. **[MCP Server Connection](/examples/mcp-connection/)** - Learn connection patterns
+2. **[Pocket-Pick Demo](/examples/pocket-pick/)** - Real server interactions
+3. **[Randy Generator](/mcp/randy-generator/)** - Custom server creation
+
+## 💡 Why Randy for MCP Learning?
+
+Traditional technical documentation can be dry and intimidating. Randy changes that by:
+
+- **Making Learning Fun**: Randy's enthusiasm is contagious
+- **Providing Context**: Every explanation includes practical examples
+- **Encouraging Experimentation**: Randy celebrates your successes and helps with failures
+- **Staying Current**: Randy knows the latest MCP patterns and best practices
+
+## 🔥 Featured Capabilities
+
+### Real-Time MCP Interactions
+
+Randy can connect to any MCP server and demonstrate:
+
+```typescript
+// Randy can execute this live!
+const mcpServer = await connectToServer('http://localhost:3000');
+const tools = await mcpServer.listTools();
+const result = await mcpServer.callTool('search_items', {
+  query: 'MCP development',
+  limit: 5
+});
+
+// Randy explains each step with enthusiasm!
+```
+
+### Code Generation & Analysis
+
+Randy generates production-ready code:
+
+**Go MCP Server:**
+```go
+// Randy creates complete, working servers
+package main
+
+import (
+    "github.com/mark3labs/mcp-go/mcp"
+    "github.com/mark3labs/mcp-go/server"
+)
+
+func main() {
+    s := server.NewStdioServer("randy-demo", "1.0.0")
+    // Randy adds all the tools you need!
+    s.RegisterTool("awesome_tool", handleAwesomeTool)
+    s.Start()
+}
+```
+
+**JavaScript MCP Server:**
+```javascript
+// Randy uses modern patterns
+import { StdioServerTransport } from '@openai/mcp-server';
+
+const server = new StdioServerTransport({
+  name: 'randy-js-demo',
+  version: '1.0.0'
+});
+
+// Randy explains every line!
+server.tool('cool_feature', {
+  description: 'Randy-generated cool feature',
+  handler: async (params) => {
+    return { success: true, message: 'Randy rocks!' };
+  }
+});
+```
+
+### Database Analysis & Export
+
+Randy can analyze MCP server databases like pocket-pick:
+
+- **Data Quality Assessment**: Find duplicates, empty records, inconsistencies
+- **Export Capabilities**: JSON, CSV, SQL formats with proper formatting
+- **Validation Reports**: MCP protocol compliance and performance analysis
+- **Optimization Suggestions**: Performance improvements and best practices
+
+## 🎮 Interactive Features
+
+### Multiple Interaction Modes
+
+**Chat Mode**: Casual conversation and quick questions
+```
+You: "Hey Randy, what's MCP?"
+Randy: "Oh my God, MCP is so cool! It's the Model Context Protocol..."
+```
+
+**Request-Response Mode**: Detailed technical requests
+```
+You: "Create a Go MCP server for file encryption"
+Randy: "Sweet! Let me build you an awesome encryption server..."
+```
+
+**Playground Mode**: Full experimentation environment
+- Connect to live servers
+- Test tool executions
+- Generate and modify code
+- Export analysis results
+
+### Real-Time Validation
+
+Randy validates everything in real-time:
+- **Protocol Compliance**: Ensures MCP standard adherence
+- **Code Quality**: Checks for best practices and potential issues
+- **Security**: Validates input sanitization and error handling
+- **Performance**: Identifies optimization opportunities
+
+## 🌟 Community & Contributions
+
+Randy is built for the MCP community:
+
+- **Open Patterns**: All generated code follows community best practices
+- **Educational Focus**: Designed to teach, not just demonstrate
+- **Real-World Examples**: Based on actual MCP server implementations
+- **Continuous Updates**: Randy learns from the latest MCP developments
+
+## 🚀 Get Started Now!
+
+Ready to dive into MCP development with Randy? Pick your path:
+
+1. **[👋 Meet Randy](/guides/meet-randy/)** - Start with introductions
+2. **[🎮 Randy Playground](/examples/randy-playground/)** - Jump into the full experience  
+3. **[🔌 MCP Connections](/examples/mcp-connection/)** - See live server interactions
+4. **[⚡ Quick Start](/guides/quick-start/)** - Build something immediately
+
+---
+
+**Randy's waiting to help you master MCP development!** He's got the knowledge, enthusiasm, and personality to make your learning journey both educational and entertaining. Let's build something awesome together!
