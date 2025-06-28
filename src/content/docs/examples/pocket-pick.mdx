@@ -1,0 +1,323 @@
+---
+title: Pocket-Pick Demo - Real MCP Server Interaction
+description: Hands-on demonstration with the pocket-pick MCP server, featuring real data operations and SQLite integration
+---
+
+import { RandyAssistant } from '../../../components/randy/RandyAssistant.tsx';
+
+# Pocket-Pick Demo - Real MCP Server Interaction
+
+Experience Randy connecting to a real MCP server! This demonstration uses the [pocket-pick](https://github.com/disler/pocket-pick) server, which provides a personal knowledge base with MCP interface.
+
+## 🎯 What is Pocket-Pick?
+
+Pocket-pick is a real-world MCP server that demonstrates:
+- **Personal Knowledge Management**: Store and retrieve text snippets
+- **Tag-based Organization**: Categorize items with tags
+- **Search Capabilities**: Full-text search across stored items
+- **SQLite Backend**: Persistent data storage
+- **MCP Protocol**: Full protocol compliance
+
+## 🚀 Live Demo with Randy
+
+Randy is configured to connect to a pocket-pick server instance. Try these interactions:
+
+<RandyAssistant 
+  mode="request-response" 
+  mcpServerUrl="http://localhost:3000"
+  showMCPControls={true}
+  client:load 
+/>
+
+## Available Operations
+
+### 🔍 Search Operations
+
+**Search by text content:**
+```
+Randy: "Search for items containing 'javascript'"
+Result: Returns all items with 'javascript' in the text
+```
+
+**Search by tags:**
+```
+Randy: "Find all items tagged with 'ai' or 'machine-learning'"
+Result: Returns items matching those tags
+```
+
+### ➕ Add New Items
+
+**Add a simple item:**
+```
+Randy: "Add this note: 'Remember to update the MCP documentation'"
+Result: Creates new item with generated ID
+```
+
+**Add item with tags:**
+```
+Randy: "Add 'MCP servers are awesome for AI integration' with tags 'mcp', 'ai', 'integration'"
+Result: Creates tagged item for easy categorization
+```
+
+### 📊 Data Exploration
+
+**List all tags:**
+```
+Randy: "What tags are available in the database?"
+Result: Shows all unique tags used in the system
+```
+
+**Get specific item:**
+```
+Randy: "Show me item with ID 42"
+Result: Retrieves and displays the specific item
+```
+
+## Real Server Setup
+
+To run your own pocket-pick server for this demo:
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/disler/pocket-pick.git
+cd pocket-pick
+
+# Install dependencies (requires uv)
+uv pip install -e .
+
+# Initialize the database
+pocket-pick init
+
+# Start the MCP server
+pocket-pick mcp-server
+```
+
+### Server Configuration
+
+```json
+{
+  "name": "pocket-pick",
+  "version": "1.0.0",
+  "description": "Personal knowledge base with MCP interface",
+  "tools": [
+    {
+      "name": "search_items",
+      "description": "Search for items by text content",
+      "parameters": {
+        "query": "string",
+        "limit": "number (optional)"
+      }
+    },
+    {
+      "name": "add_item", 
+      "description": "Add a new item to the knowledge base",
+      "parameters": {
+        "text": "string (required)",
+        "tags": "array of strings (optional)"
+      }
+    },
+    {
+      "name": "get_item_by_id",
+      "description": "Retrieve a specific item by its ID",
+      "parameters": {
+        "id": "number (required)"
+      }
+    },
+    {
+      "name": "list_tags",
+      "description": "Get all available tags",
+      "parameters": {}
+    }
+  ]
+}
+```
+
+## Database Structure
+
+Pocket-pick uses SQLite with this schema:
+
+```sql
+CREATE TABLE items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    text TEXT NOT NULL,
+    tags TEXT  -- JSON array of tag strings
+);
+
+-- Example data
+INSERT INTO items (text, tags) VALUES 
+('MCP protocol enables AI agents to interact with external tools', '["mcp", "ai", "protocol"]'),
+('JavaScript MCP servers can be built with OpenAI agents SDK', '["javascript", "mcp", "sdk"]'),
+('Go implementation provides type safety for MCP development', '["go", "mcp", "types"]');
+```
+
+## Randy's MCP Integration
+
+### Tool Execution
+
+When you ask Randy to interact with pocket-pick, here's what happens:
+
+```typescript
+// Randy processes your request
+const userRequest = "Search for items about MCP";
+
+// Randy calls the appropriate MCP tool
+const mcpResponse = await server.callTool('search_items', {
+  query: 'MCP',
+  limit: 10
+});
+
+// Randy formats and presents the results
+const randyResponse = formatWithPersonality(mcpResponse, "search");
+```
+
+### Error Handling
+
+Randy gracefully handles common scenarios:
+
+**Server Offline:**
+```
+Randy: "Aw jeez, the pocket-pick server isn't responding! 
+Make sure it's running on localhost:3000. Want me to show you 
+how to start it up?"
+```
+
+**Empty Results:**
+```
+Randy: "Well butter my biscuit, no items found for that search! 
+Try a different search term, or we can add some new items 
+to get this party started!"
+```
+
+**Invalid Parameters:**
+```
+Randy: "Oopsie daisy! That tool call didn't work. 
+Let me fix those parameters and try again!"
+```
+
+## SQLite Export & Analysis
+
+### Data Export
+
+Randy can help you export and analyze the pocket-pick database:
+
+```python
+# Export script Randy can generate
+import sqlite3
+import json
+from datetime import datetime
+
+def export_pocket_pick_data(db_path='pocket_pick.db'):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Export all items
+    cursor.execute("SELECT * FROM items")
+    items = cursor.fetchall()
+    
+    export_data = {
+        'exported_at': datetime.now().isoformat(),
+        'total_items': len(items),
+        'items': [
+            {
+                'id': item[0],
+                'created': item[1], 
+                'text': item[2],
+                'tags': json.loads(item[3]) if item[3] else []
+            }
+            for item in items
+        ]
+    }
+    
+    return export_data
+
+# Randy can run this and show you the results!
+```
+
+### Validation & Evaluation
+
+Randy can validate the MCP server implementation:
+
+```python
+# Validation script Randy uses
+async def validate_mcp_server(server_url):
+    tests = [
+        ('search_items', {'query': 'test'}),
+        ('list_tags', {}),
+        ('add_item', {'text': 'test item', 'tags': ['test']}),
+        ('get_item_by_id', {'id': 1})
+    ]
+    
+    results = []
+    for tool_name, params in tests:
+        try:
+            result = await call_mcp_tool(server_url, tool_name, params)
+            results.append({
+                'tool': tool_name,
+                'status': 'success',
+                'response': result
+            })
+        except Exception as e:
+            results.append({
+                'tool': tool_name, 
+                'status': 'error',
+                'error': str(e)
+            })
+    
+    return results
+```
+
+## Interactive Examples
+
+### Complete Workflow Demo
+
+Try this complete workflow with Randy:
+
+1. **Connect**: "Connect to the pocket-pick server"
+2. **Explore**: "What tools are available?"
+3. **Search**: "Search for items about 'AI'"
+4. **Add**: "Add a new item about MCP being awesome"
+5. **Verify**: "Search for the item I just added"
+6. **Analyze**: "Show me all available tags"
+
+### Advanced Operations
+
+**Bulk Operations:**
+```
+Randy: "Add multiple items about different programming languages 
+with appropriate tags for each"
+```
+
+**Data Analysis:**
+```
+Randy: "Analyze the content in the database and tell me 
+what topics are most common"
+```
+
+**Export Request:**
+```
+Randy: "Export all items as JSON and show me the data structure"
+```
+
+## Next Steps
+
+After exploring pocket-pick:
+
+1. **[Go Server Development](/mcp/go-server)** - Build your own MCP server in Go
+2. **[JavaScript Server Development](/mcp/js-server)** - Alternative JS implementation  
+3. **[Randy Generator](/mcp/randy-generator)** - Let Randy create custom servers
+
+## Development Integration
+
+Use pocket-pick as a reference for your own MCP servers:
+
+- **Protocol Implementation**: Study the MCP compliance patterns
+- **Tool Design**: Learn effective tool parameter design
+- **Error Handling**: See proper error response formatting
+- **Testing**: Use as a test target for MCP clients
+
+---
+
+**Ready to explore?** Use the interactive Randy above to connect to a live pocket-pick server and experience real MCP interactions!
