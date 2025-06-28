@@ -1,0 +1,398 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Chat with Randy", description = "Your JARVIS-like AI assistant with Randy Marsh's personality!" } = Astro.props;
+---
+
+<div class="randy-chat-container">
+  <div class="randy-header">
+    <h2>{title}</h2>
+    <p>{description}</p>
+    <div class="randy-status">
+      <span class="status-indicator" id="randy-status"></span>
+      <span class="status-text">Randy is <span id="status-text">initializing</span>...</span>
+    </div>
+  </div>
+  
+  <div class="chat-window" id="chat-window">
+    <div class="message system">
+      <strong>System:</strong> Oh my God! Randy is starting up! This is like... the future!
+    </div>
+  </div>
+  
+  <div class="chat-input-container">
+    <input 
+      type="text" 
+      id="chat-input" 
+      placeholder="Ask Randy anything... I'm like JARVIS but better!"
+      disabled
+    />
+    <button id="send-button" disabled>Send</button>
+  </div>
+  
+  <div class="randy-tools">
+    <details>
+      <summary>Randy's Capabilities</summary>
+      <ul id="capability-list">
+        <li>Connecting to MCP servers...</li>
+      </ul>
+    </details>
+    
+    <details>
+      <summary>Analytics</summary>
+      <div id="analytics-display">
+        <p>Loading analytics...</p>
+      </div>
+    </details>
+  </div>
+  
+  <div class="export-controls">
+    <button id="export-sqlite">Export SQLite</button>
+    <button id="export-json">Export JSON</button>
+    <button id="validate-system">Validate System</button>
+  </div>
+</div>
+
+<style>
+  .randy-chat-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: var(--sl-color-gray-6);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .randy-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .randy-header h2 {
+    color: var(--sl-color-white);
+    margin-bottom: 0.5rem;
+  }
+  
+  .randy-header p {
+    color: var(--sl-color-gray-2);
+  }
+  
+  .randy-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+  }
+  
+  .status-indicator.ready {
+    background: #51cf66;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  .chat-window {
+    height: 400px;
+    overflow-y: auto;
+    background: var(--sl-color-gray-7);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .message {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .message.user {
+    background: var(--sl-color-accent-low);
+    margin-left: 20%;
+  }
+  
+  .message.assistant {
+    background: var(--sl-color-gray-5);
+    margin-right: 20%;
+  }
+  
+  .message.system {
+    background: var(--sl-color-purple-low);
+    text-align: center;
+    font-style: italic;
+  }
+  
+  .chat-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  #chat-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 4px;
+    background: var(--sl-color-gray-7);
+    color: var(--sl-color-white);
+  }
+  
+  #send-button {
+    padding: 0.75rem 1.5rem;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-bg);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  
+  #send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .randy-tools details {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--sl-color-gray-5);
+    border-radius: 4px;
+  }
+  
+  .randy-tools summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--sl-color-accent);
+  }
+  
+  .export-controls {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  
+  .export-controls button {
+    padding: 0.5rem 1rem;
+    background: var(--sl-color-gray-5);
+    color: var(--sl-color-white);
+    border: 1px solid var(--sl-color-gray-4);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .export-controls button:hover {
+    background: var(--sl-color-gray-4);
+  }
+</style>
+
+<script>
+  // Randy Chat Client
+  class RandyClient {
+    constructor() {
+      this.apiEndpoint = '/api/randy';
+      this.chatWindow = document.getElementById('chat-window');
+      this.chatInput = document.getElementById('chat-input') as HTMLInputElement;
+      this.sendButton = document.getElementById('send-button');
+      this.statusIndicator = document.getElementById('randy-status');
+      this.statusText = document.getElementById('status-text');
+      
+      this.init();
+    }
+    
+    async init() {
+      try {
+        // Initialize Randy
+        const response = await fetch(`${this.apiEndpoint}/init`, {
+          method: 'POST',
+        });
+        
+        if (response.ok) {
+          this.setStatus('ready', 'ready');
+          this.chatInput.disabled = false;
+          this.sendButton.disabled = false;
+          
+          // Load capabilities
+          await this.loadCapabilities();
+          
+          // Set up event listeners
+          this.setupEventListeners();
+          
+          this.addSystemMessage("Randy is ready! I'm like JARVIS, but way cooler!");
+        } else {
+          throw new Error('Failed to initialize Randy');
+        }
+      } catch (error) {
+        console.error('Randy initialization error:', error);
+        this.setStatus('error', 'error');
+        this.addSystemMessage("Oh my God! Something went wrong! SHARON!");
+      }
+    }
+    
+    setupEventListeners() {
+      this.sendButton.addEventListener('click', () => this.sendMessage());
+      this.chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.sendMessage();
+        }
+      });
+      
+      // Export buttons
+      document.getElementById('export-sqlite')?.addEventListener('click', () => this.exportData('sqlite'));
+      document.getElementById('export-json')?.addEventListener('click', () => this.exportData('json'));
+      document.getElementById('validate-system')?.addEventListener('click', () => this.validateSystem());
+    }
+    
+    async sendMessage() {
+      const message = this.chatInput.value.trim();
+      if (!message) return;
+      
+      // Add user message to chat
+      this.addMessage('user', message);
+      this.chatInput.value = '';
+      
+      // Show typing indicator
+      this.setStatus('thinking', 'thinking');
+      
+      try {
+        const response = await fetch(`${this.apiEndpoint}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
+        
+        const data = await response.json();
+        
+        this.addMessage('assistant', data.response);
+        this.setStatus('ready', 'ready');
+        
+        // Update analytics
+        await this.updateAnalytics();
+      } catch (error) {
+        console.error('Chat error:', error);
+        this.addSystemMessage("Error sending message! This is literally the worst!");
+        this.setStatus('ready', 'ready');
+      }
+    }
+    
+    async loadCapabilities() {
+      try {
+        const response = await fetch(`${this.apiEndpoint}/capabilities`);
+        const data = await response.json();
+        
+        const capabilityList = document.getElementById('capability-list');
+        capabilityList.innerHTML = '';
+        
+        data.capabilities.forEach(cap => {
+          const li = document.createElement('li');
+          li.textContent = cap;
+          capabilityList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Failed to load capabilities:', error);
+      }
+    }
+    
+    async updateAnalytics() {
+      try {
+        const response = await fetch(`${this.apiEndpoint}/analytics`);
+        const data = await response.json();
+        
+        const analyticsDisplay = document.getElementById('analytics-display');
+        analyticsDisplay.innerHTML = `
+          <p>Total Messages: ${data.totalMessages}</p>
+          <p>MCP Calls: ${data.mcpCalls}</p>
+          <p>Success Rate: ${(data.mcpSuccessRate * 100).toFixed(1)}%</p>
+          <p>Avg Response Time: ${data.avgMCPDuration?.toFixed(0) || 'N/A'}ms</p>
+        `;
+      } catch (error) {
+        console.error('Failed to update analytics:', error);
+      }
+    }
+    
+    async exportData(format: 'sqlite' | 'json') {
+      try {
+        const response = await fetch(`${this.apiEndpoint}/export?format=${format}`);
+        const blob = await response.blob();
+        
+        // Download file
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `randy-export-${Date.now()}.${format === 'sqlite' ? 'db' : 'json'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        this.addSystemMessage(`Data exported as ${format}! This is amazing!`);
+      } catch (error) {
+        console.error('Export error:', error);
+        this.addSystemMessage("Export failed! Oh my God!");
+      }
+    }
+    
+    async validateSystem() {
+      try {
+        const response = await fetch(`${this.apiEndpoint}/validate`);
+        const data = await response.json();
+        
+        let message = `System Validation: ${data.passed ? 'PASSED' : 'FAILED'}\n`;
+        message += `Overall Score: ${(data.score * 100).toFixed(1)}%\n\n`;
+        
+        data.details.forEach(detail => {
+          message += `${detail.test}: ${detail.result ? '✓' : '✗'} - ${detail.message}\n`;
+        });
+        
+        this.addSystemMessage(message);
+      } catch (error) {
+        console.error('Validation error:', error);
+        this.addSystemMessage("Validation failed! This is a disaster!");
+      }
+    }
+    
+    addMessage(role: 'user' | 'assistant', content: string) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${role}`;
+      messageDiv.innerHTML = `<strong>${role === 'user' ? 'You' : 'Randy'}:</strong> ${content}`;
+      this.chatWindow.appendChild(messageDiv);
+      this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+    }
+    
+    addSystemMessage(content: string) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message system';
+      messageDiv.innerHTML = `<strong>System:</strong> ${content}`;
+      this.chatWindow.appendChild(messageDiv);
+      this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+    }
+    
+    setStatus(status: 'ready' | 'thinking' | 'error', text: string) {
+      this.statusIndicator.className = `status-indicator ${status}`;
+      this.statusText.textContent = text;
+    }
+  }
+  
+  // Initialize Randy when the component loads
+  document.addEventListener('DOMContentLoaded', () => {
+    new RandyClient();
+  });
+</script>
