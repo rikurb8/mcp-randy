@@ -1,0 +1,840 @@
+---
+title: JavaScript MCP Server Development with Randy
+description: Build flexible MCP servers in JavaScript/TypeScript using OpenAI Agents SDK with Randy's interactive guidance
+---
+
+import { RandyAssistant } from '../../../components/randy/RandyAssistant.tsx';
+
+# JavaScript MCP Server Development with Randy
+
+Create powerful MCP servers in JavaScript/TypeScript using the [OpenAI Agents SDK](https://openai.github.io/openai-agents-js). Randy will help you build modern, scalable servers with the latest patterns.
+
+## 🚀 Interactive JavaScript Development
+
+Randy is your expert guide for JavaScript MCP development! He knows all the latest SDK features and best practices:
+
+<RandyAssistant 
+  mode="request-response" 
+  showMCPControls={false}
+  client:load 
+/>
+
+Try asking Randy: *"Create a TypeScript MCP server for API interactions"*
+
+## 📦 OpenAI Agents SDK Overview
+
+The OpenAI Agents SDK provides:
+
+- **TypeScript Support**: Full type safety and IntelliSense
+- **Multiple Transports**: stdio, HTTP, WebSocket support
+- **Modern Patterns**: Async/await, Promise-based APIs
+- **Flexible Architecture**: Plugin system and middleware support
+- **Development Tools**: Built-in debugging and testing utilities
+
+### Installation
+
+```bash
+# Create new project
+mkdir my-mcp-server
+cd my-mcp-server
+npm init -y
+
+# Install dependencies
+npm install @openai/mcp-server
+npm install -D typescript @types/node tsx
+
+# Initialize TypeScript
+npx tsc --init
+```
+
+## 🎯 Minimal TypeScript MCP Server
+
+Here's a complete server Randy would help you build:
+
+### Basic Server Setup
+
+```typescript
+// server.ts
+import { StdioServerTransport } from '@openai/mcp-server';
+import { z } from 'zod';
+
+// Server configuration
+const serverConfig = {
+  name: 'randy-demo-server',
+  version: '1.0.0',
+  description: 'Demo MCP server built with Randy\'s help'
+};
+
+// Tool parameter schemas
+const CalculateSchema = z.object({
+  expression: z.string().describe('Mathematical expression to evaluate')
+});
+
+const GreetSchema = z.object({
+  name: z.string().describe('Name of the person to greet'),
+  style: z.enum(['formal', 'casual', 'enthusiastic']).optional()
+    .describe('Greeting style')
+});
+
+const FileListSchema = z.object({
+  path: z.string().optional().describe('Directory path to list'),
+  includeHidden: z.boolean().optional().describe('Include hidden files')
+});
+
+// Main server class
+class RandyMCPServer {
+  private transport: StdioServerTransport;
+
+  constructor() {
+    this.transport = new StdioServerTransport({
+      name: serverConfig.name,
+      version: serverConfig.version,
+      description: serverConfig.description
+    });
+    
+    this.setupTools();
+  }
+
+  private setupTools() {
+    // Calculator tool
+    this.transport.tool('calculate', {
+      description: 'Perform basic arithmetic operations',
+      parameters: CalculateSchema,
+      handler: this.handleCalculate.bind(this)
+    });
+
+    // Greeting tool
+    this.transport.tool('greet', {
+      description: 'Generate personalized greetings',
+      parameters: GreetSchema,
+      handler: this.handleGreet.bind(this)
+    });
+
+    // File operations tool
+    this.transport.tool('list_files', {
+      description: 'List files in a directory',
+      parameters: FileListSchema,
+      handler: this.handleFileList.bind(this)
+    });
+  }
+
+  // Tool handlers
+  private async handleCalculate(params: z.infer<typeof CalculateSchema>) {
+    const { expression } = params;
+    
+    try {
+      // Simple calculation (use proper math parser in production)
+      const result = this.evaluateExpression(expression);
+      
+      return {
+        success: true,
+        data: {
+          expression,
+          result,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      throw new Error(`Calculation failed: ${error.message}`);
+    }
+  }
+
+  private async handleGreet(params: z.infer<typeof GreetSchema>) {
+    const { name, style = 'casual' } = params;
+    
+    const greetings = {
+      formal: `Good day, ${name}. It is a pleasure to make your acquaintance.`,
+      casual: `Hello, ${name}! Nice to meet you.`,
+      enthusiastic: `Hey there, ${name}! Oh my God, this is so exciting!`
+    };
+    
+    return {
+      success: true,
+      data: {
+        greeting: greetings[style],
+        name,
+        style,
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  private async handleFileList(params: z.infer<typeof FileListSchema>) {
+    const { path = '.', includeHidden = false } = params;
+    
+    try {
+      const fs = await import('fs/promises');
+      const entries = await fs.readdir(path, { withFileTypes: true });
+      
+      const files = entries
+        .filter(entry => includeHidden || !entry.name.startsWith('.'))
+        .map(async entry => {
+          const stats = await fs.stat(`${path}/${entry.name}`);
+          return {
+            name: entry.name,
+            size: stats.size,
+            isDirectory: entry.isDirectory(),
+            modified: stats.mtime.toISOString()
+          };
+        });
+      
+      const fileList = await Promise.all(files);
+      
+      return {
+        success: true,
+        data: {
+          path,
+          files: fileList,
+          count: fileList.length,
+          includeHidden
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to list files: ${error.message}`);
+    }
+  }
+
+  // Simple expression evaluator (replace with proper parser)
+  private evaluateExpression(expr: string): number {
+    // Basic safety check
+    if (!/^[\d+\-*/\s().]+$/.test(expr)) {
+      throw new Error('Invalid expression');
+    }
+    
+    try {
+      return Function(`"use strict"; return (${expr})`)();
+    } catch (error) {
+      throw new Error('Expression evaluation failed');
+    }
+  }
+
+  // Start the server
+  async start() {
+    console.log(`Starting ${serverConfig.name} v${serverConfig.version}`);
+    await this.transport.start();
+  }
+}
+
+// Start server
+const server = new RandyMCPServer();
+server.start().catch(console.error);
+```
+
+### Package.json Configuration
+
+```json
+{
+  "name": "randy-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server built with Randy's guidance",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@openai/mcp-server": "^0.1.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "jest": "^29.0.0"
+  }
+}
+```
+
+## 🔧 Advanced Features
+
+### HTTP Transport Server
+
+```typescript
+// http-server.ts
+import { HttpServerTransport } from '@openai/mcp-server';
+import express from 'express';
+
+class HTTPMCPServer {
+  private app: express.Application;
+  private transport: HttpServerTransport;
+
+  constructor() {
+    this.app = express();
+    this.transport = new HttpServerTransport({
+      name: 'randy-http-server',
+      version: '1.0.0'
+    });
+    
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupTools();
+  }
+
+  private setupMiddleware() {
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    
+    // CORS middleware
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      next();
+    });
+  }
+
+  private setupRoutes() {
+    // Health check
+    this.app.get('/health', (req, res) => {
+      res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    });
+    
+    // MCP endpoint
+    this.app.post('/mcp', this.transport.handler);
+  }
+
+  private setupTools() {
+    // API request tool
+    this.transport.tool('api_request', {
+      description: 'Make HTTP API requests',
+      parameters: z.object({
+        url: z.string().url().describe('API endpoint URL'),
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).describe('HTTP method'),
+        headers: z.record(z.string()).optional().describe('Request headers'),
+        body: z.any().optional().describe('Request body')
+      }),
+      handler: this.handleApiRequest.bind(this)
+    });
+
+    // Database query tool (if database is configured)
+    this.transport.tool('db_query', {
+      description: 'Execute database queries',
+      parameters: z.object({
+        query: z.string().describe('SQL query to execute'),
+        params: z.array(z.any()).optional().describe('Query parameters')
+      }),
+      handler: this.handleDbQuery.bind(this)
+    });
+  }
+
+  private async handleApiRequest(params: any) {
+    const { url, method, headers = {}, body } = params;
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          body: data
+        }
+      };
+    } catch (error) {
+      throw new Error(`API request failed: ${error.message}`);
+    }
+  }
+
+  private async handleDbQuery(params: any) {
+    // Database implementation would go here
+    throw new Error('Database not configured');
+  }
+
+  start(port: number = 3000) {
+    this.app.listen(port, () => {
+      console.log(`HTTP MCP Server running on port ${port}`);
+    });
+  }
+}
+
+// Start HTTP server
+const httpServer = new HTTPMCPServer();
+httpServer.start();
+```
+
+### WebSocket Transport
+
+```typescript
+// websocket-server.ts
+import { WebSocketServerTransport } from '@openai/mcp-server';
+import { WebSocketServer } from 'ws';
+
+class WebSocketMCPServer {
+  private wss: WebSocketServer;
+  private transport: WebSocketServerTransport;
+
+  constructor() {
+    this.wss = new WebSocketServer({ port: 8080 });
+    this.transport = new WebSocketServerTransport({
+      name: 'randy-ws-server',
+      version: '1.0.0'
+    });
+    
+    this.setupWebSocket();
+    this.setupTools();
+  }
+
+  private setupWebSocket() {
+    this.wss.on('connection', (ws) => {
+      console.log('New WebSocket connection');
+      
+      ws.on('message', async (data) => {
+        try {
+          const message = JSON.parse(data.toString());
+          const response = await this.transport.handleMessage(message);
+          ws.send(JSON.stringify(response));
+        } catch (error) {
+          ws.send(JSON.stringify({
+            error: { message: error.message }
+          }));
+        }
+      });
+      
+      ws.on('close', () => {
+        console.log('WebSocket connection closed');
+      });
+    });
+  }
+
+  private setupTools() {
+    // Real-time data tool
+    this.transport.tool('stream_data', {
+      description: 'Stream real-time data updates',
+      parameters: z.object({
+        source: z.string().describe('Data source identifier'),
+        interval: z.number().optional().describe('Update interval in ms')
+      }),
+      handler: this.handleStreamData.bind(this)
+    });
+  }
+
+  private async handleStreamData(params: any) {
+    const { source, interval = 1000 } = params;
+    
+    // Implement streaming logic
+    return {
+      success: true,
+      data: {
+        message: `Streaming ${source} data every ${interval}ms`,
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
+  start() {
+    console.log('WebSocket MCP Server running on port 8080');
+  }
+}
+
+const wsServer = new WebSocketMCPServer();
+wsServer.start();
+```
+
+## 🧪 Testing Framework
+
+### Unit Tests
+
+```typescript
+// tests/server.test.ts
+import { RandyMCPServer } from '../src/server';
+
+describe('RandyMCPServer', () => {
+  let server: RandyMCPServer;
+
+  beforeEach(() => {
+    server = new RandyMCPServer();
+  });
+
+  describe('Calculator Tool', () => {
+    it('should calculate simple expressions', async () => {
+      const result = await server.handleCalculate({ expression: '2 + 2' });
+      
+      expect(result.success).toBe(true);
+      expect(result.data.result).toBe(4);
+      expect(result.data.expression).toBe('2 + 2');
+    });
+
+    it('should handle invalid expressions', async () => {
+      await expect(
+        server.handleCalculate({ expression: 'invalid' })
+      ).rejects.toThrow('Calculation failed');
+    });
+  });
+
+  describe('Greeting Tool', () => {
+    it('should generate casual greetings by default', async () => {
+      const result = await server.handleGreet({ name: 'Randy' });
+      
+      expect(result.success).toBe(true);
+      expect(result.data.greeting).toContain('Randy');
+      expect(result.data.style).toBe('casual');
+    });
+
+    it('should respect style parameter', async () => {
+      const result = await server.handleGreet({ 
+        name: 'Randy', 
+        style: 'enthusiastic' 
+      });
+      
+      expect(result.data.style).toBe('enthusiastic');
+      expect(result.data.greeting).toContain('Oh my God');
+    });
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+// tests/integration.test.ts
+import { StdioServerTransport } from '@openai/mcp-server';
+
+describe('MCP Integration', () => {
+  let client: any; // MCP client implementation
+
+  beforeEach(async () => {
+    // Start server in test mode
+    client = await createTestClient();
+  });
+
+  it('should initialize successfully', async () => {
+    const response = await client.initialize({
+      protocolVersion: '0.1.0',
+      clientInfo: { name: 'test-client' }
+    });
+    
+    expect(response.protocolVersion).toBe('0.1.0');
+    expect(response.serverInfo.name).toBe('randy-demo-server');
+  });
+
+  it('should list available tools', async () => {
+    const tools = await client.listTools();
+    
+    expect(tools).toHaveLength(3);
+    expect(tools.map(t => t.name)).toContain('calculate');
+    expect(tools.map(t => t.name)).toContain('greet');
+    expect(tools.map(t => t.name)).toContain('list_files');
+  });
+
+  it('should execute tools successfully', async () => {
+    const result = await client.callTool('calculate', {
+      expression: '10 * 5'
+    });
+    
+    expect(result.success).toBe(true);
+    expect(result.data.result).toBe(50);
+  });
+});
+```
+
+## 🔗 Advanced Integrations
+
+### Database Integration
+
+```typescript
+// database-tools.ts
+import { Pool } from 'pg';
+import { z } from 'zod';
+
+export class DatabaseTools {
+  private pool: Pool;
+
+  constructor(connectionString: string) {
+    this.pool = new Pool({ connectionString });
+  }
+
+  setupTools(transport: any) {
+    // Query tool
+    transport.tool('db_query', {
+      description: 'Execute SQL queries',
+      parameters: z.object({
+        query: z.string().describe('SQL query'),
+        params: z.array(z.any()).optional().describe('Parameters')
+      }),
+      handler: this.handleQuery.bind(this)
+    });
+
+    // Table info tool
+    transport.tool('db_table_info', {
+      description: 'Get table schema information',
+      parameters: z.object({
+        tableName: z.string().describe('Table name')
+      }),
+      handler: this.handleTableInfo.bind(this)
+    });
+  }
+
+  private async handleQuery(params: any) {
+    const { query, params: queryParams = [] } = params;
+    
+    try {
+      const result = await this.pool.query(query, queryParams);
+      
+      return {
+        success: true,
+        data: {
+          rows: result.rows,
+          rowCount: result.rowCount,
+          fields: result.fields?.map(f => ({
+            name: f.name,
+            dataType: f.dataTypeID
+          }))
+        }
+      };
+    } catch (error) {
+      throw new Error(`Query failed: ${error.message}`);
+    }
+  }
+
+  private async handleTableInfo(params: any) {
+    const { tableName } = params;
+    
+    const query = `
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns 
+      WHERE table_name = $1
+      ORDER BY ordinal_position
+    `;
+    
+    try {
+      const result = await this.pool.query(query, [tableName]);
+      
+      return {
+        success: true,
+        data: {
+          tableName,
+          columns: result.rows
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to get table info: ${error.message}`);
+    }
+  }
+}
+```
+
+### File System Integration
+
+```typescript
+// filesystem-tools.ts
+import { promises as fs } from 'fs';
+import { z } from 'zod';
+import path from 'path';
+
+export class FileSystemTools {
+  private basePath: string;
+
+  constructor(basePath: string = process.cwd()) {
+    this.basePath = basePath;
+  }
+
+  setupTools(transport: any) {
+    // Read file tool
+    transport.tool('read_file', {
+      description: 'Read file contents',
+      parameters: z.object({
+        filePath: z.string().describe('Path to file'),
+        encoding: z.string().optional().describe('File encoding')
+      }),
+      handler: this.handleReadFile.bind(this)
+    });
+
+    // Write file tool
+    transport.tool('write_file', {
+      description: 'Write content to file',
+      parameters: z.object({
+        filePath: z.string().describe('Path to file'),
+        content: z.string().describe('File content'),
+        encoding: z.string().optional().describe('File encoding')
+      }),
+      handler: this.handleWriteFile.bind(this)
+    });
+
+    // Search files tool
+    transport.tool('search_files', {
+      description: 'Search for files matching pattern',
+      parameters: z.object({
+        pattern: z.string().describe('Search pattern'),
+        directory: z.string().optional().describe('Directory to search')
+      }),
+      handler: this.handleSearchFiles.bind(this)
+    });
+  }
+
+  private async handleReadFile(params: any) {
+    const { filePath, encoding = 'utf8' } = params;
+    const fullPath = path.resolve(this.basePath, filePath);
+    
+    try {
+      const content = await fs.readFile(fullPath, encoding);
+      const stats = await fs.stat(fullPath);
+      
+      return {
+        success: true,
+        data: {
+          content,
+          filePath,
+          size: stats.size,
+          modified: stats.mtime.toISOString()
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to read file: ${error.message}`);
+    }
+  }
+
+  private async handleWriteFile(params: any) {
+    const { filePath, content, encoding = 'utf8' } = params;
+    const fullPath = path.resolve(this.basePath, filePath);
+    
+    try {
+      await fs.writeFile(fullPath, content, encoding);
+      const stats = await fs.stat(fullPath);
+      
+      return {
+        success: true,
+        data: {
+          filePath,
+          size: stats.size,
+          modified: stats.mtime.toISOString()
+        }
+      };
+    } catch (error) {
+      throw new Error(`Failed to write file: ${error.message}`);
+    }
+  }
+
+  private async handleSearchFiles(params: any) {
+    const { pattern, directory = '.' } = params;
+    const searchPath = path.resolve(this.basePath, directory);
+    
+    try {
+      const { default: glob } = await import('glob');
+      const files = await glob(pattern, { cwd: searchPath });
+      
+      const fileDetails = await Promise.all(
+        files.map(async (file) => {
+          const fullPath = path.join(searchPath, file);
+          const stats = await fs.stat(fullPath);
+          return {
+            path: file,
+            size: stats.size,
+            modified: stats.mtime.toISOString(),
+            isDirectory: stats.isDirectory()
+          };
+        })
+      );
+      
+      return {
+        success: true,
+        data: {
+          pattern,
+          directory,
+          files: fileDetails,
+          count: fileDetails.length
+        }
+      };
+    } catch (error) {
+      throw new Error(`Search failed: ${error.message}`);
+    }
+  }
+}
+```
+
+## 🚀 Randy's JavaScript Tips
+
+Ask Randy for help with these JavaScript/TypeScript scenarios:
+
+### Modern Patterns
+```
+"Randy, show me async/await patterns for MCP tools"
+"Help me implement TypeScript generics for tool handlers"
+"Create a middleware system for my MCP server"
+```
+
+### Performance Optimization
+```
+"Optimize my JavaScript MCP server for high concurrency"
+"Show me connection pooling patterns for MCP"
+"Help me implement caching for expensive operations"
+```
+
+### Error Handling
+```
+"Create comprehensive error handling for my MCP tools"
+"Show me how to validate and sanitize user inputs"
+"Implement retry logic for failed operations"
+```
+
+## 📦 Deployment Examples
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY dist/ ./dist/
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
+```
+
+### Docker Compose
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://user:pass@db:5432/mcpdb
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=mcpdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+```
+
+## 🎯 Next Steps
+
+1. **[Go Server Development](/mcp/go-server)** - Compare with Go implementation
+2. **[Randy Generator](/mcp/randy-generator)** - Automated server creation
+3. **[Pocket-Pick Demo](/examples/pocket-pick)** - Real server example
+
+---
+
+**Ready to code?** Use the interactive Randy above to start building your JavaScript MCP server!
