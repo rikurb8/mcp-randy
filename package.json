@@ -15,8 +15,9 @@
     "@types/better-sqlite3": "^7.6.13",
     "astro": "^5.6.1",
     "better-sqlite3": "^12.1.1",
-    "openai-agents-js": "^0.1.9",
+    "openai": "^5.8.2",
     "sharp": "^0.32.5",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "zod": "^3.25.67"
   }
 }
