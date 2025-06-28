@@ -1,0 +1,615 @@
+---
+title: Go MCP Server Development with Randy
+description: Build powerful MCP servers in Go with Randy's help, featuring mark3labs/mcp-go examples and best practices
+---
+
+import { RandyAssistant } from '../../../components/randy/RandyAssistant.tsx';
+
+# Go MCP Server Development with Randy
+
+Learn to build robust MCP servers in Go using the [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) library. Randy will guide you through the process with live examples and interactive development.
+
+## 🚀 Interactive Go Development
+
+Randy is ready to help you build Go MCP servers! He knows the latest patterns and can generate code for you:
+
+<RandyAssistant 
+  mode="request-response" 
+  showMCPControls={false}
+  client:load 
+/>
+
+Try asking Randy: *"Help me create a Go MCP server for file operations"*
+
+## 🏗️ MCP-Go Library Overview
+
+The `mark3labs/mcp-go` library provides:
+
+- **Type-Safe Implementation**: Full Go type safety for MCP protocol
+- **Transport Abstractions**: Support for stdio, HTTP, and WebSocket
+- **Tool Registration**: Simple API for registering tools
+- **Resource Management**: Built-in resource handling
+- **Error Handling**: Comprehensive error types
+
+### Current Status
+
+⚠️ **Note**: The mcp-go library is under active development. Some APIs may change.
+
+## 📋 Prerequisites
+
+```bash
+# Go 1.21 or later required
+go version
+
+# Create new project
+mkdir my-mcp-server
+cd my-mcp-server
+go mod init my-mcp-server
+
+# Add mcp-go dependency (when stable)
+# go get github.com/mark3labs/mcp-go
+```
+
+## 🎯 Minimal Go MCP Server
+
+Here's a complete minimal server Randy would help you build:
+
+### Basic Server Structure
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "os"
+    
+    // When mcp-go is stable:
+    // "github.com/mark3labs/mcp-go/mcp"
+    // "github.com/mark3labs/mcp-go/server"
+)
+
+// Server represents our MCP server
+type Server struct {
+    name    string
+    version string
+}
+
+// NewServer creates a new MCP server instance
+func NewServer(name, version string) *Server {
+    return &Server{
+        name:    name,
+        version: version,
+    }
+}
+
+// Tool represents an MCP tool
+type Tool struct {
+    Name        string                 `json:"name"`
+    Description string                 `json:"description"`
+    Parameters  map[string]interface{} `json:"parameters"`
+}
+
+// ToolResult represents the result of a tool execution
+type ToolResult struct {
+    Success bool        `json:"success"`
+    Result  interface{} `json:"result,omitempty"`
+    Error   string      `json:"error,omitempty"`
+}
+
+func main() {
+    server := NewServer("randy-demo-server", "1.0.0")
+    
+    // Register tools
+    server.RegisterCalculatorTool()
+    server.RegisterGreetingTool()
+    server.RegisterFileListTool()
+    
+    // Start server (stdio transport)
+    log.Printf("Starting MCP server: %s v%s", server.name, server.version)
+    server.Start()
+}
+```
+
+### Tool Registration
+
+```go
+// RegisterCalculatorTool adds a calculator tool
+func (s *Server) RegisterCalculatorTool() {
+    tool := Tool{
+        Name:        "calculate",
+        Description: "Perform basic arithmetic operations",
+        Parameters: map[string]interface{}{
+            "type": "object",
+            "properties": map[string]interface{}{
+                "expression": map[string]interface{}{
+                    "type":        "string",
+                    "description": "Mathematical expression to evaluate (e.g., '2 + 2')",
+                },
+            },
+            "required": []string{"expression"},
+        },
+    }
+    
+    // Register with handler
+    s.registerTool(tool, s.handleCalculate)
+}
+
+// handleCalculate processes calculator requests
+func (s *Server) handleCalculate(ctx context.Context, params map[string]interface{}) ToolResult {
+    expression, ok := params["expression"].(string)
+    if !ok {
+        return ToolResult{
+            Success: false,
+            Error:   "expression parameter is required and must be a string",
+        }
+    }
+    
+    // Simple calculation logic (in real implementation, use a proper parser)
+    result, err := evaluateExpression(expression)
+    if err != nil {
+        return ToolResult{
+            Success: false,
+            Error:   fmt.Sprintf("calculation error: %v", err),
+        }
+    }
+    
+    return ToolResult{
+        Success: true,
+        Result: map[string]interface{}{
+            "expression": expression,
+            "result":     result,
+        },
+    }
+}
+
+// RegisterGreetingTool adds a greeting tool
+func (s *Server) RegisterGreetingTool() {
+    tool := Tool{
+        Name:        "greet",
+        Description: "Generate a personalized greeting",
+        Parameters: map[string]interface{}{
+            "type": "object",
+            "properties": map[string]interface{}{
+                "name": map[string]interface{}{
+                    "type":        "string",
+                    "description": "Name of the person to greet",
+                },
+                "style": map[string]interface{}{
+                    "type":        "string",
+                    "description": "Greeting style: formal, casual, or enthusiastic",
+                    "enum":        []string{"formal", "casual", "enthusiastic"},
+                },
+            },
+            "required": []string{"name"},
+        },
+    }
+    
+    s.registerTool(tool, s.handleGreeting)
+}
+
+// handleGreeting processes greeting requests
+func (s *Server) handleGreeting(ctx context.Context, params map[string]interface{}) ToolResult {
+    name, ok := params["name"].(string)
+    if !ok {
+        return ToolResult{
+            Success: false,
+            Error:   "name parameter is required",
+        }
+    }
+    
+    style, _ := params["style"].(string)
+    if style == "" {
+        style = "casual"
+    }
+    
+    var greeting string
+    switch style {
+    case "formal":
+        greeting = fmt.Sprintf("Good day, %s. It is a pleasure to meet you.", name)
+    case "enthusiastic":
+        greeting = fmt.Sprintf("Hey there, %s! Oh my God, this is so exciting!", name)
+    default:
+        greeting = fmt.Sprintf("Hello, %s! Nice to meet you.", name)
+    }
+    
+    return ToolResult{
+        Success: true,
+        Result: map[string]interface{}{
+            "greeting": greeting,
+            "style":    style,
+            "name":     name,
+        },
+    }
+}
+```
+
+### File Operations Tool
+
+```go
+// RegisterFileListTool adds file listing capability
+func (s *Server) RegisterFileListTool() {
+    tool := Tool{
+        Name:        "list_files",
+        Description: "List files in a directory",
+        Parameters: map[string]interface{}{
+            "type": "object",
+            "properties": map[string]interface{}{
+                "path": map[string]interface{}{
+                    "type":        "string",
+                    "description": "Directory path to list (default: current directory)",
+                },
+                "include_hidden": map[string]interface{}{
+                    "type":        "boolean",
+                    "description": "Include hidden files (default: false)",
+                },
+            },
+        },
+    }
+    
+    s.registerTool(tool, s.handleFileList)
+}
+
+// handleFileList processes file listing requests
+func (s *Server) handleFileList(ctx context.Context, params map[string]interface{}) ToolResult {
+    path, _ := params["path"].(string)
+    if path == "" {
+        path = "."
+    }
+    
+    includeHidden, _ := params["include_hidden"].(bool)
+    
+    entries, err := os.ReadDir(path)
+    if err != nil {
+        return ToolResult{
+            Success: false,
+            Error:   fmt.Sprintf("failed to read directory: %v", err),
+        }
+    }
+    
+    var files []map[string]interface{}
+    for _, entry := range entries {
+        name := entry.Name()
+        
+        // Skip hidden files unless requested
+        if !includeHidden && name[0] == '.' {
+            continue
+        }
+        
+        info, err := entry.Info()
+        if err != nil {
+            continue
+        }
+        
+        files = append(files, map[string]interface{}{
+            "name":      name,
+            "size":      info.Size(),
+            "is_dir":    entry.IsDir(),
+            "modified":  info.ModTime().Unix(),
+        })
+    }
+    
+    return ToolResult{
+        Success: true,
+        Result: map[string]interface{}{
+            "path":  path,
+            "files": files,
+            "count": len(files),
+        },
+    }
+}
+```
+
+## 🔧 Advanced Features
+
+### Resource Management
+
+```go
+// Resource represents an MCP resource
+type Resource struct {
+    URI         string `json:"uri"`
+    Name        string `json:"name"`
+    Description string `json:"description"`
+    MimeType    string `json:"mimeType"`
+}
+
+// RegisterResources adds resource endpoints
+func (s *Server) RegisterResources() {
+    resources := []Resource{
+        {
+            URI:         "file://config.json",
+            Name:        "Server Configuration",
+            Description: "Current server configuration",
+            MimeType:    "application/json",
+        },
+        {
+            URI:         "file://logs/latest.log",
+            Name:        "Latest Logs", 
+            Description: "Most recent server logs",
+            MimeType:    "text/plain",
+        },
+    }
+    
+    for _, resource := range resources {
+        s.registerResource(resource)
+    }
+}
+```
+
+### Error Handling
+
+```go
+// MCPError represents an MCP protocol error
+type MCPError struct {
+    Code    int    `json:"code"`
+    Message string `json:"message"`
+    Data    interface{} `json:"data,omitempty"`
+}
+
+func (e MCPError) Error() string {
+    return fmt.Sprintf("MCP error %d: %s", e.Code, e.Message)
+}
+
+// Common MCP error codes
+const (
+    ErrorInvalidRequest     = -32600
+    ErrorMethodNotFound     = -32601  
+    ErrorInvalidParams      = -32602
+    ErrorInternalError      = -32603
+    ErrorParseError         = -32700
+)
+
+// validateToolParams validates tool parameters
+func validateToolParams(tool Tool, params map[string]interface{}) error {
+    schema := tool.Parameters
+    required, _ := schema["required"].([]string)
+    
+    for _, field := range required {
+        if _, exists := params[field]; !exists {
+            return MCPError{
+                Code:    ErrorInvalidParams,
+                Message: fmt.Sprintf("missing required parameter: %s", field),
+            }
+        }
+    }
+    
+    return nil
+}
+```
+
+### Protocol Implementation
+
+```go
+// MCPRequest represents an incoming MCP request
+type MCPRequest struct {
+    JSONRPC string      `json:"jsonrpc"`
+    Method  string      `json:"method"`
+    Params  interface{} `json:"params,omitempty"`
+    ID      interface{} `json:"id,omitempty"`
+}
+
+// MCPResponse represents an MCP response
+type MCPResponse struct {
+    JSONRPC string      `json:"jsonrpc"`
+    Result  interface{} `json:"result,omitempty"`
+    Error   *MCPError   `json:"error,omitempty"`
+    ID      interface{} `json:"id,omitempty"`
+}
+
+// handleMCPRequest processes incoming MCP requests
+func (s *Server) handleMCPRequest(request MCPRequest) MCPResponse {
+    response := MCPResponse{
+        JSONRPC: "2.0",
+        ID:      request.ID,
+    }
+    
+    switch request.Method {
+    case "initialize":
+        response.Result = s.handleInitialize(request.Params)
+    case "tools/list":
+        response.Result = s.handleToolsList()
+    case "tools/call":
+        result, err := s.handleToolCall(request.Params)
+        if err != nil {
+            response.Error = &MCPError{
+                Code:    ErrorInternalError,
+                Message: err.Error(),
+            }
+        } else {
+            response.Result = result
+        }
+    default:
+        response.Error = &MCPError{
+            Code:    ErrorMethodNotFound,
+            Message: fmt.Sprintf("method not found: %s", request.Method),
+        }
+    }
+    
+    return response
+}
+```
+
+## 🧪 Testing Your Server
+
+### Unit Tests
+
+```go
+package main
+
+import (
+    "context"
+    "testing"
+)
+
+func TestCalculatorTool(t *testing.T) {
+    server := NewServer("test", "1.0.0")
+    server.RegisterCalculatorTool()
+    
+    tests := []struct {
+        name       string
+        params     map[string]interface{}
+        wantResult bool
+    }{
+        {
+            name:       "simple addition",
+            params:     map[string]interface{}{"expression": "2 + 2"},
+            wantResult: true,
+        },
+        {
+            name:       "missing expression",
+            params:     map[string]interface{}{},
+            wantResult: false,
+        },
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := server.handleCalculate(context.Background(), tt.params)
+            if result.Success != tt.wantResult {
+                t.Errorf("expected success=%v, got=%v", tt.wantResult, result.Success)
+            }
+        })
+    }
+}
+```
+
+### Integration Testing
+
+```go
+// TestServerIntegration tests the full server
+func TestServerIntegration(t *testing.T) {
+    server := NewServer("test-server", "1.0.0") 
+    server.RegisterCalculatorTool()
+    server.RegisterGreetingTool()
+    
+    // Test initialization
+    initParams := map[string]interface{}{
+        "protocolVersion": "0.1.0",
+        "clientInfo": map[string]interface{}{
+            "name": "test-client",
+        },
+    }
+    
+    initResult := server.handleInitialize(initParams)
+    // Assert initialization success
+    
+    // Test tool listing
+    tools := server.handleToolsList()
+    // Assert expected tools are present
+    
+    // Test tool execution
+    calcParams := map[string]interface{}{
+        "name": "calculate",
+        "arguments": map[string]interface{}{
+            "expression": "5 * 3",
+        },
+    }
+    
+    calcResult, err := server.handleToolCall(calcParams)
+    if err != nil {
+        t.Fatalf("tool call failed: %v", err)
+    }
+    // Assert calculation result
+}
+```
+
+## 🚀 Randy's Go Development Tips
+
+Ask Randy for help with these common scenarios:
+
+### Server Architecture
+```
+"Randy, help me design a Go MCP server for database operations"
+"Show me how to structure a large Go MCP server project"
+"What's the best way to handle concurrent requests in Go MCP servers?"
+```
+
+### Tool Development
+```
+"Create a Go tool for file encryption/decryption"
+"Help me build a database query tool with proper error handling"
+"Show me how to implement streaming responses in Go MCP tools"
+```
+
+### Protocol Compliance
+```
+"Validate my Go MCP server implementation"
+"Help me debug MCP protocol errors"
+"Show me proper error response formatting in Go"
+```
+
+## 📚 Complete Example Repository
+
+Randy can generate a complete, runnable Go MCP server project:
+
+```
+Ask Randy: "Generate a complete Go MCP server project with 
+file operations, calculator, and database tools, including 
+tests, documentation, and deployment configuration"
+```
+
+## 🔗 Integration Examples
+
+### Database Integration
+
+```go
+// DatabaseTool provides database operations
+type DatabaseTool struct {
+    db *sql.DB
+}
+
+func (dt *DatabaseTool) handleQuery(ctx context.Context, params map[string]interface{}) ToolResult {
+    query, ok := params["query"].(string)
+    if !ok {
+        return ToolResult{Success: false, Error: "query parameter required"}
+    }
+    
+    rows, err := dt.db.QueryContext(ctx, query)
+    if err != nil {
+        return ToolResult{Success: false, Error: err.Error()}
+    }
+    defer rows.Close()
+    
+    // Process results...
+    return ToolResult{Success: true, Result: results}
+}
+```
+
+### HTTP Client Integration
+
+```go
+// HTTPTool provides HTTP operations
+type HTTPTool struct {
+    client *http.Client
+}
+
+func (ht *HTTPTool) handleRequest(ctx context.Context, params map[string]interface{}) ToolResult {
+    url, _ := params["url"].(string)
+    method, _ := params["method"].(string)
+    
+    req, err := http.NewRequestWithContext(ctx, method, url, nil)
+    if err != nil {
+        return ToolResult{Success: false, Error: err.Error()}
+    }
+    
+    resp, err := ht.client.Do(req)
+    if err != nil {
+        return ToolResult{Success: false, Error: err.Error()}
+    }
+    defer resp.Body.Close()
+    
+    // Process response...
+    return ToolResult{Success: true, Result: responseData}
+}
+```
+
+## 🎯 Next Steps
+
+1. **[JavaScript Server Development](/mcp/js-server)** - Compare with JS implementation
+2. **[Randy Generator](/mcp/randy-generator)** - Let Randy create servers for you
+3. **[Pocket-Pick Demo](/examples/pocket-pick)** - See real server in action
+
+---
+
+**Ready to build?** Use the interactive Randy above to start developing your Go MCP server!
