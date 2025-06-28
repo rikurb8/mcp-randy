@@ -1,0 +1,179 @@
+---
+title: Randy Playground - Full Interactive Experience
+description: Complete Randy assistant experience with all modes, MCP connections, and advanced features
+---
+
+import { RandyAssistant } from '../../../components/randy/RandyAssistant.tsx';
+
+# Randy Playground - Full Interactive Experience
+
+Welcome to the Randy Playground! This is where you can experience the full power of Randy, your JARVIS-like MCP assistant. Here you'll find all of Randy's capabilities in one interactive environment.
+
+## 🎮 Full-Featured Randy
+
+This playground includes:
+- **All Input Modes**: Switch between chat, request-response, and playground modes
+- **MCP Server Connections**: Connect to live servers and test tools
+- **Real-time Interaction**: Dynamic responses with Randy's personality
+- **Advanced Controls**: Reset, clear, and configure options
+
+<RandyAssistant mode="playground" client:load />
+
+## What You Can Do Here
+
+### 🔌 Connect to MCP Servers
+
+Try connecting to different MCP servers:
+
+1. **Pocket-Pick Demo Server**
+   - Local development server for testing
+   - Includes search, add, and list capabilities
+   - Perfect for learning MCP basics
+
+2. **Custom Server**
+   - Connect to your own MCP server
+   - Test any MCP-compatible implementation
+   - Validate your server development
+
+### 💬 Explore Randy's Personality
+
+Ask Randy different types of questions to see his personality in action:
+
+**Technical Questions:**
+- "How do I create an MCP server?"
+- "What tools does this server have?"
+- "Show me the server capabilities"
+
+**Casual Conversation:**
+- "Hey Randy, how's it going?"
+- "This is pretty cool!"
+- "I'm having trouble with my server"
+
+**MCP-Specific:**
+- "Connect to the pocket-pick server"
+- "Search for items about AI"
+- "What MCP tools are available?"
+
+### 🚀 Test Different Input Modes
+
+The playground automatically adapts Randy's behavior based on your interaction:
+
+- **Short questions** → Chat-like responses
+- **Detailed requests** → Structured technical responses  
+- **Commands** → Action-oriented responses with MCP calls
+
+## Advanced Features
+
+### Real-time MCP Tool Execution
+
+When connected to an MCP server, Randy can:
+
+```typescript
+// Example tool calls Randy can make
+await mcpServer.callTool('search_items', {
+  query: 'your search term',
+  limit: 10
+});
+
+await mcpServer.callTool('add_item', {
+  text: 'new item content',
+  tags: ['tag1', 'tag2']
+});
+```
+
+### Dynamic Server Discovery
+
+Randy automatically discovers available tools and capabilities:
+
+- **Tool Enumeration**: Lists all available server tools
+- **Capability Detection**: Identifies read/write/search permissions
+- **Version Checking**: Ensures compatibility
+- **Error Handling**: Provides helpful error messages
+
+### Interactive Code Examples
+
+Randy can generate and explain code snippets:
+
+**Go MCP Server Example:**
+```go
+package main
+
+import (
+    "github.com/mark3labs/mcp-go/mcp"
+    "github.com/mark3labs/mcp-go/server"
+)
+
+func main() {
+    s := server.NewStdioServer("my-server", "1.0.0")
+    // Randy can help you build this!
+}
+```
+
+**JavaScript MCP Server Example:**
+```javascript
+import { StdioServerTransport } from '@openai/mcp-server';
+
+const server = new StdioServerTransport({
+  name: 'my-server',
+  version: '1.0.0'
+});
+// Randy explains each step!
+```
+
+## Playground Tips
+
+### Getting the Most from Randy
+
+1. **Be Specific**: The more context you provide, the better Randy's responses
+2. **Try Different Phrasings**: Randy adapts to different communication styles
+3. **Explore Failures**: Connect failures and errors are learning opportunities
+4. **Ask Follow-ups**: Randy maintains context throughout the conversation
+
+### Common Playground Scenarios
+
+**Learning MCP Basics:**
+```
+You: "I'm new to MCP, where should I start?"
+Randy: "Oh my God, welcome to the amazing world of MCP! 
+Let me break this down for you..."
+```
+
+**Server Development:**
+```
+You: "Help me create a Go MCP server for file operations"
+Randy: "Sweet! File operations are awesome! 
+Let's build something that'll blow your mind!"
+```
+
+**Troubleshooting:**
+```
+You: "My server connection is failing"
+Randy: "Aw jeez, connection issues are the worst! 
+Let's figure out what's going wrong..."
+```
+
+## Playground Controls
+
+### Clear & Reset
+- **Clear Chat**: Removes conversation history
+- **Reset Randy**: Restarts Randy's personality engine
+- **Disconnect**: Closes MCP server connections
+
+### Mode Switching
+Randy automatically detects your intent, but you can explicitly request:
+- **"Switch to chat mode"** - Casual conversation
+- **"I need help building something"** - Request-response mode
+- **"Let me experiment"** - Full playground mode
+
+## Next Steps
+
+After exploring the playground:
+
+1. **[MCP Server Connection Guide](/examples/mcp-connection)** - Learn connection details
+2. **[Pocket-Pick Demo](/examples/pocket-pick)** - Real server example
+3. **[Go Server Development](/mcp/go-server)** - Build your own server
+4. **[JavaScript Server Development](/mcp/js-server)** - Alternative implementation
+
+---
+
+**Have fun exploring!** Randy is here to help you master MCP development while keeping things entertaining and educational.
