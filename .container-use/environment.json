@@ -1,4 +1,10 @@
 {
   "workdir": "/workdir",
-  "base_image": "ubuntu:24.04"
+  "base_image": "node:20-alpine",
+  "setup_commands": [
+    "npm install -g pnpm"
+  ],
+  "env": [
+    "NODE_ENV=development"
+  ]
 }
